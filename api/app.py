@@ -7,8 +7,8 @@ import asyncio
 import logging
 
 # Make sure these imports match your actual file names!
-from main import load_business_pdf, ask_business_question
-from main import ask_simple_question
+from .main import load_business_pdf, ask_business_question
+from .main import ask_simple_question
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
