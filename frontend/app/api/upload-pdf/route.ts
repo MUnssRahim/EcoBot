@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Re-export the backend app
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '50mb',
-    },
-  },
-};
+
 
 export async function POST(request: NextRequest) {
   try {
