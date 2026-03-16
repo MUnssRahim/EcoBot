@@ -34,8 +34,8 @@ export default function Home() {
     formData.append("file", file);
 
     try {
-      // ✅ CHANGED: Pointing directly to your Python backend for uploads
-      const res = await fetch("https://eco-bot-v2-2tl1mptv1-muhammad-unss-rahims-projects.vercel.app/upload-pdf/", {
+      // ✅ CHANGED: Using permanent URL and NO trailing slash
+      const res = await fetch("https://eco-bot-v2.vercel.app/upload-pdf", {
         method: "POST",
         body: formData,
       });
@@ -71,10 +71,10 @@ export default function Home() {
     const formData = new FormData();
     formData.append("question", userMessage);
 
-    // ✅ CHANGED: Pointing directly to your Python backend for questions
+    // ✅ CHANGED: Using permanent URLs and NO trailing slashes
     const endpoint = chatMode === "pdf" && uploadedFileName
-        ? "https://eco-bot-v2-2tl1mptv1-muhammad-unss-rahims-projects.vercel.app/ask-question/"
-        : "https://eco-bot-v2-2tl1mptv1-muhammad-unss-rahims-projects.vercel.app/ask-simple/";
+        ? "https://eco-bot-v2.vercel.app/ask-question"
+        : "https://eco-bot-v2.vercel.app/ask-simple";
 
     try {
       const res = await fetch(endpoint, { method: "POST", body: formData });
