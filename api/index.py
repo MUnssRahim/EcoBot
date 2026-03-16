@@ -16,7 +16,10 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://ecobot-production-6600.up.railway.app", # Your live frontend
+        "http://localhost:3000",                         # For local testing
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
