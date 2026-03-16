@@ -1,138 +1,182 @@
-# RAG Sustainability Application
+# EcoBot – Sustainability RAG Assistant
 
-An intelligent RAG (Retrieval-Augmented Generation) system for analyzing sustainability and ESG metrics from documents.
+EcoBot is an intelligent **Retrieval-Augmented Generation (RAG)** system that analyzes business documents and answers questions related to **sustainability and ESG practices**.
 
-## Features
-- 📄 PDF upload and processing
-- 🤖 AI-powered question answering
-- 🔍 Semantic search and retrieval
-- 💚 Sustainability and ESG analysis
-- ⚡ Fast inference with Groq LLM
-- 🧠 Cohere embeddings
+It allows users to upload **business PDFs (like sustainability or ESG reports)** and ask questions about them. The system retrieves relevant document sections and generates accurate answers using modern LLMs.
 
-## Tech Stack
-- **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS
-- **Backend**: FastAPI, Python 3.11
-- **Vector DB**: Pinecone
-- **LLM**: Groq Mistral
-- **Embeddings**: Cohere
-- **Deployment**: Vercel + Docker/Railway
+EcoBot can also answer **general sustainability questions**, even without a document.
 
-## Quick Start
+---
 
-### Prerequisites
-- Node.js 18+
-- Python 3.11+
-- API Keys:
-  - Groq API Key (https://console.groq.com)
-  - Pinecone API Key (https://www.pinecone.io)
-  - Cohere API Key (https://cohere.com)
+# Features
 
-### Setup
+- 📄 Upload and analyze business PDF reports  
+- 🤖 AI-powered question answering  
+- 🔍 Semantic search across documents  
+- 🌱 Sustainability and ESG insights  
+- ⚡ Fast responses using Groq LLM  
+- 🧠 Cohere embeddings for semantic understanding  
+- 📊 Vector search with Pinecone  
 
-1. **Clone repository**
-```bash
-git clone <repo-url>
-cd ragsustainability_codes_deployed
+---
+
+# Tech Stack
+
+## Frontend
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+
+## Backend
+- FastAPI
+- Python 3.11
+
+## AI Stack
+- Groq (Mistral LLM)
+- Cohere Embeddings
+- Pinecone Vector Database
+
+---
+
+# Project Structure
+
+```
+EcoBot
+│
+├── frontend/        # Next.js frontend
+├── main.py          # RAG pipeline and AI logic
+├── app.py           # FastAPI backend
+├── requirements.txt # Python dependencies
+├── Dockerfile       # Container setup
+├── vercel.json      # Vercel deployment config
+└── .env.example     # Environment variable template
 ```
 
-2. **Configure environment variables**
+---
+
+# Setup Instructions
+
+## 1 Clone the Repository
+
 ```bash
-cp .env.example .env
-# Edit .env with your API keys
+git clone https://github.com/<your-username>/EcoBot.git
+cd EcoBot
 ```
 
-3. **Setup Backend**
+---
+
+# 2 Configure Environment Variables
+
+Create a `.env` file in the root directory.
+
+```
+GROQ_API_KEY=your_key
+PINECONE_API_KEY=your_key
+COHERE_API_KEY=your_key
+
+NEXT_PUBLIC_API_URL=/api
+```
+
+---
+
+# 3 Run Backend
+
+Install Python dependencies:
+
 ```bash
 pip install -r requirements.txt
+```
+
+Run FastAPI server:
+
+```bash
 python -m uvicorn app:app --reload --port 8000
 ```
 
-4. **Setup Frontend**
+---
+
+# 4 Run Frontend
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-5. **Open application**
-Navigate to http://localhost:3000
+---
 
-## Deployment
+# 5 Open the Application
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions to Vercel.
+```
+http://localhost:3000
+```
 
-## API Methods
+---
 
-### Upload PDF
-```bash
+# API Endpoints
+
+## Upload PDF
+
+```
 POST /api/upload-pdf
-Content-Type: multipart/form-data
-
-file: <binary pdf>
 ```
 
-### Ask Question (about PDF)
-```bash
+Form Data:
+
+```
+file: <pdf document>
+```
+
+---
+
+## Ask Question About Uploaded PDF
+
+```
 POST /api/ask-question
-Content-Type: application/x-www-form-urlencoded
-
-question=What are the ESG metrics?
 ```
 
-### Ask Simple Question (general)
-```bash
+Body:
+
+```
+question=What sustainability practices does the company follow?
+```
+
+---
+
+## Ask General Sustainability Question
+
+```
 POST /api/ask-simple
-Content-Type: application/x-www-form-urlencoded
-
-question=What is sustainability?
 ```
 
-## Project Structure
+Body:
 
 ```
-├── frontend/              # Next.js frontend application
-├── main.py               # RAG logic and LLM integration
-├── app.py                # FastAPI server
-├── requirements.txt      # Python dependencies
-├── Dockerfile            # Docker configuration
-├── vercel.json          # Vercel deployment config
-├── .env.example         # Environment variables template
-└── DEPLOYMENT.md        # Deployment guide
+question=What is ESG?
 ```
 
-## Environment Variables
+---
 
-```env
-# API Keys
-GROQ_API_KEY=your_key
-PINECONE_API_KEY=your_key
-COHERE_API_KEY=your_key
+# Development
 
-# Frontend
-NEXT_PUBLIC_API_URL=/api  # For Vercel deployment
+## Start Backend
+
+```bash
+python -m uvicorn app:app --reload
 ```
 
-## Development
+## Start Frontend
 
-### Frontend Development
 ```bash
 cd frontend
-npm run dev        # Start dev server
-npm run build      # Build for production
-npm run lint       # Run linter
+npm run dev
 ```
 
-### Backend Development
-```bash
-python -m uvicorn app:app --reload  # Start with auto-reload
-```
+---
 
-## Notes
-- PDFs are cached in memory for 10 minutes
-- Use strong API keys and rotate regularly
-- Always deploy with proper security headers
-- Monitor API usage to avoid quota limits
+# Notes
 
-## License
-[Your License Here]
+- Uploaded PDFs are temporarily cached for processing
+- Designed for **business sustainability analysis**
+- Supports **document-based and general AI queries**
