@@ -38,7 +38,7 @@ async def schedule_cleanup(file_id: str, delay_seconds: int = 600):
         if last_file_id == file_id:
             last_file_id = None
 
-@app.post("/upload-pdf/")
+@app.post("/upload-pdf")
 async def upload_pdf(file: UploadFile = File(...)):
     global last_file_id
     try:
@@ -57,7 +57,7 @@ async def upload_pdf(file: UploadFile = File(...)):
         logging.error(f"[UPLOAD ERROR] {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
-@app.post("/ask-question/")
+@app.post("/ask-question")
 async def ask_question_api(question: str = Form(...)):
     global last_file_id
 
@@ -82,7 +82,7 @@ async def ask_question_api(question: str = Form(...)):
 @app.get("/")
 def root():
     return {"message": "API is live!"}
-@app.post("/ask-simple/")
+@app.post("/ask-simple")
 async def ask_simple_api(question: str = Form(...)):
     global last_session_id
     
