@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pdfplumber
+requests
+langchain
+langchain_huggingface
+langchain_pinecone
+pinecone-client
+python-dotenv
+cohere
