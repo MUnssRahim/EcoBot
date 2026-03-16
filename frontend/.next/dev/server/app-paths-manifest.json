@@ -1,0 +1,4 @@
+{
+  "/api/ask-simple/route": "app/api/ask-simple/route.js",
+  "/page": "app/page.js"
+}
