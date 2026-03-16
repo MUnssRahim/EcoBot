@@ -76,7 +76,9 @@ async def ask_question_api(question: str = Form(...)):
     except Exception as e:
         logging.error(f"[QUESTION ERROR] {e}")
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
-
+@app.get("/")
+def root():
+    return {"message": "API is live!"}
 @app.post("/ask-simple/")
 async def ask_simple_api(question: str = Form(...)):
     global last_session_id
