@@ -34,7 +34,8 @@ export default function Home() {
     formData.append("file", file);
 
     try {
-      const res = await fetch("/api/upload-pdf", {
+      // ✅ CHANGED: Pointing directly to your Python backend for uploads
+      const res = await fetch("https://eco-bot-v2-2tl1mptv1-muhammad-unss-rahims-projects.vercel.app/upload-pdf/", {
         method: "POST",
         body: formData,
       });
@@ -70,9 +71,10 @@ export default function Home() {
     const formData = new FormData();
     formData.append("question", userMessage);
 
+    // ✅ CHANGED: Pointing directly to your Python backend for questions
     const endpoint = chatMode === "pdf" && uploadedFileName
-        ? "/api/ask-question"
-        : "/api/ask-simple";
+        ? "https://eco-bot-v2-2tl1mptv1-muhammad-unss-rahims-projects.vercel.app/ask-question/"
+        : "https://eco-bot-v2-2tl1mptv1-muhammad-unss-rahims-projects.vercel.app/ask-simple/";
 
     try {
       const res = await fetch(endpoint, { method: "POST", body: formData });
