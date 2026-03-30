@@ -13,12 +13,12 @@ from .main import ask_simple_question
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 app = FastAPI()
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://ecobot-production-6600.up.railway.app", # Your live frontend
-        "http://localhost:3000",                         # For local testing
+        "http://localhost:3000",
+        "https://victorious-stone-0e5e7de00.1.azurestaticapps.net", # Double-check this matches your browser exactly!
+        "https://ecobot-production-6600.up.railway.app", 
     ],
     allow_credentials=True,
     allow_methods=["*"],
