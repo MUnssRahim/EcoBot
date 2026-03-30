@@ -35,7 +35,7 @@ export default function Home() {
 
     try {
       // ✅ UPDATED: New Railway Backend URL
-      const res = await fetch("ecobotsustainability-hmg6hmebhbe6f7bq.centralindia-01.azurewebsites.net/upload-pdf", {
+      const res = await fetch("https://ecobotsustainability-hmg6hmebhbe6f7bq.centralindia-01.azurewebsites.net/upload-pdf", {
         method: "POST",
         body: formData,
       });
@@ -72,8 +72,8 @@ export default function Home() {
 
     // ✅ UPDATED: New Railway Backend URLs
     const endpoint = chatMode === "pdf" && uploadedFileName
-        ? "ecobotsustainability-hmg6hmebhbe6f7bq.centralindia-01.azurewebsites.net/ask-question"
-        : "ecobotsustainability-hmg6hmebhbe6f7bq.centralindia-01.azurewebsites.net/ask-simple";
+        ? "https://ecobotsustainability-hmg6hmebhbe6f7bq.centralindia-01.azurewebsites.net/ask-question"
+        : "https://ecobotsustainability-hmg6hmebhbe6f7bq.centralindia-01.azurewebsites.net/ask-simple";
 
     try {
       const res = await fetch(endpoint, { method: "POST", body: formData });
