@@ -1,49 +1,61 @@
-name: Azure Static Web Apps CI/CD - EcoBot Frontend
+name: Build and deploy Python app to Azure Web App - Ecobotsustainability
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
-  build_and_deploy_job:
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+  build:
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: true
-          lfs: false
 
-      - name: Build And Deploy
-        id: builddeploy
-        uses: Azure/static-web-apps-deploy@v1
+      - name: Set up Python version
+        uses: actions/setup-python@v5
         with:
-          # 🔑 Your exact token is hardcoded right here:
-          azure_static_web_apps_api_token: "6fa4491de1197906cf1572b64a258f0a8b480563c5c2bd9fbb61d2793354e53e01-e06d756c-359a-4e02-aa81-3f074ed2698000028190e5e7de00"
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          action: "upload"
+          python-version: '3.11'
+
+      - name: Create and Start virtual environment and Install dependencies
+        run: |
+          python -m venv antenv
+          source antenv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Upload artifact for deployment jobs
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-app
+         
           
-          # 📂 The exact folder routing you need:
-          app_location: "/frontend"
-          api_location: ""
-          output_location: ".next"
+          path: |
+            .
+            !frontend/
 
-  close_pull_request_job:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+  deploy:
     runs-on: ubuntu-latest
-    name: Close Pull Request Job
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+
     steps:
-      - name: Close Pull Request
-        id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
         with:
-          # 🔑 Token hardcoded here for PR closures too:
-          azure_static_web_apps_api_token: "6fa4491de1197906cf1572b64a258f0a8b480563c5c2bd9fbb61d2793354e53e01-e06d756c-359a-4e02-aa81-3f074ed2698000028190e5e7de00"
-          action: "close"
+          name: python-app
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C15094E9F9B84A6DA92183746F185AFB }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_AB43673CB48F476C8B49EF54F49BDEAA }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_474E76DDD3E14BE081E31D990C4F8746 }}
+
+      - name: 'Deploy to Azure Web App'
+        uses: azure/webapps-deploy@v3
+        id: deploy-to-webapp
+        with:
+          app-name: 'Ecobotsustainability'
+          slot-name: 'Production'
