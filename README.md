@@ -1,102 +1,117 @@
-# EcoBot – Sustainability RAG Assistant
+# EcoBot
 
-EcoBot is an intelligent **Retrieval-Augmented Generation (RAG)** system that analyzes business documents and answers questions related to **sustainability and ESG practices**.
+EcoBot is a sustainability-focused AI assistant that helps users understand ESG and environmental performance by analyzing uploaded PDFs and answering sustainability-related questions using a retrieval-augmented generation (RAG) workflow.
 
-It allows users to upload **business PDFs (like sustainability or ESG reports)** and ask questions about them. The system retrieves relevant document sections and generates accurate answers using modern LLMs.
+Live demo: https://victorious-stone-0e5e7de00.1.azurestaticapps.net/
 
-EcoBot can also answer **general sustainability questions**, even without a document.
+## Why EcoBot?
 
----
+Businesses often have valuable sustainability knowledge locked inside ESG reports, annual filings, and policy documents. EcoBot brings that information into a conversational interface so users can quickly ask:
 
-# Features
+- What are the company’s environmental priorities?
+- Which ESG themes are covered in the report?
+- What sustainability actions are described in the document?
+- How do the findings relate to broader sustainability practices?
 
-- 📄 Upload and analyze business PDF reports  
-- 🤖 AI-powered question answering  
-- 🔍 Semantic search across documents  
-- 🌱 Sustainability and ESG insights  
-- ⚡ Fast responses using Groq LLM  
-- 🧠 Cohere embeddings for semantic understanding  
-- 📊 Vector search with Pinecone  
+## Key Features
 
----
+- PDF upload and document-based analysis
+- AI-powered question answering with contextual retrieval
+- Sustainability and ESG-focused responses
+- General sustainability Q&A without a document
+- Fast frontend experience built with Next.js
+- Backend API built with FastAPI
+- Semantic retrieval using Pinecone + embeddings
+- LLM integration with Groq
 
-# Tech Stack
+## Tech Stack
 
-## Frontend
+### Frontend
 - Next.js
 - React
 - TypeScript
 - Tailwind CSS
 
-## Backend
+### Backend
+- Python
 - FastAPI
-- Python 3.11
+- Uvicorn
 
-## AI Stack
-- Groq (Mistral LLM)
-- Cohere Embeddings
-- Pinecone Vector Database
+### AI and Retrieval
+- Groq LLM
+- Cohere embeddings
+- Pinecone vector database
+- PDF processing with pdfplumber
 
----
+## Project Structure
 
-# Project Structure
-
+```text
+EcoBot/
+├── .github/
+│   └── workflows/
+│       └── main_ecobotsustainability.yml
+├── api/
+│   ├── __pycache__/
+│   ├── index.py
+│   └── main.py
+├── frontend/
+│   ├── app/
+│   ├── public/
+│   ├── .eslintrc.*
+│   ├── eslint.config.mjs
+│   ├── next-env.d.ts
+│   ├── next.config.ts
+│   ├── package.json
+│   ├── postcss.config.mjs
+│   ├── tsconfig.json
+│   └── Dockerfile.dev
+├── .env.example
+├── .gitignore
+├── README.md
+├── requirements.txt
+├── vercel.json
+└── .vscode/
 ```
-EcoBot
-│
-├── frontend/        # Next.js frontend
-├── main.py          # RAG pipeline and AI logic
-├── app.py           # FastAPI backend
-├── requirements.txt # Python dependencies
-├── Dockerfile       # Container setup
-├── vercel.json      # Vercel deployment config
-└── .env.example     # Environment variable template
-```
 
----
+## Local Setup
 
-# Setup Instructions
-
-## 1 Clone the Repository
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/<your-username>/EcoBot.git
+git clone https://github.com/MUnssRahim/EcoBot.git
 cd EcoBot
 ```
 
----
+### 2. Configure environment variables
 
-# 2 Configure Environment Variables
+Copy the example file and add your real keys:
 
-Create a `.env` file in the root directory.
-
-```
-GROQ_API_KEY=your_key
-PINECONE_API_KEY=your_key
-COHERE_API_KEY=your_key
-
-NEXT_PUBLIC_API_URL=/api
+```bash
+cp .env.example .env
 ```
 
----
+Then update the values in `.env`:
 
-# 3 Run Backend
+```env
+GROQ_API_KEY=your_groq_api_key_here
+PINECONE_API_KEY=your_pinecone_api_key_here
+COHERE_API_KEY=your_cohere_api_key_here
+NEXT_PUBLIC_API_URL=https://your-api-url-here
+```
 
-Install Python dependencies:
+### 3. Install Python dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Run FastAPI server:
+### 4. Run the backend
 
 ```bash
-python -m uvicorn app:app --reload --port 8000
+python -m uvicorn api.index:app --reload --port 8000
 ```
 
----
-
-# 4 Run Frontend
+### 5. Run the frontend
 
 ```bash
 cd frontend
@@ -104,79 +119,54 @@ npm install
 npm run dev
 ```
 
----
+Open the app in your browser:
 
-# 5 Open the Application
-
-```
+```text
 http://localhost:3000
 ```
 
----
+## API Overview
 
-# API Endpoints
+### Upload PDF
 
-## Upload PDF
-
-```
-POST /api/upload-pdf
+```http
+POST /upload-pdf
 ```
 
-Form Data:
+Form field:
 
-```
-file: <pdf document>
-```
-
----
-
-## Ask Question About Uploaded PDF
-
-```
-POST /api/ask-question
+```text
+file: <pdf-document>
 ```
 
-Body:
+### Ask a question about the uploaded PDF
 
-```
-question=What sustainability practices does the company follow?
-```
-
----
-
-## Ask General Sustainability Question
-
-```
-POST /api/ask-simple
+```http
+POST /ask-question
 ```
 
-Body:
+### Ask a general sustainability question
 
-```
-question=What is ESG?
-```
-
----
-
-# Development
-
-## Start Backend
-
-```bash
-python -m uvicorn app:app --reload
+```http
+POST /ask-simple
 ```
 
-## Start Frontend
+## Deployment
 
-```bash
-cd frontend
-npm run dev
-```
+This project is configured for deployment on Azure and is also prepared for frontend hosting with Vercel-compatible patterns. The live application can be accessed here:
 
----
+https://victorious-stone-0e5e7de00.1.azurestaticapps.net/
 
-# Notes
+## Development Notes
 
-- Uploaded PDFs are temporarily cached for processing
-- Designed for **business sustainability analysis**
-- Supports **document-based and general AI queries**
+- Uploaded PDFs are processed and temporarily retained for contextual use.
+- The system supports both document-grounded and general sustainability interaction.
+- The project is designed for business sustainability analysis, ESG review, and document-based insights.
+
+## Contributing
+
+Contributions are welcome. Please keep the project structure clean, follow existing patterns, and add meaningful documentation for new features.
+
+## License
+
+This project is intended for internal or learning use unless explicitly stated otherwise by the repository owner.
