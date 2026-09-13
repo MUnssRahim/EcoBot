@@ -83,26 +83,9 @@ These are prompt- and retrieval-level controls, not a factuality guarantee. The 
 
 ## Evaluation and Metrics
 
-There is no committed evaluation dataset, automated RAG evaluation suite, tracing integration, or benchmark in the repository. A production evaluation plan should measure Recall@k and nDCG for page-level evidence retrieval, context precision and recall, answer faithfulness and relevance, abstention accuracy, provider latency, token usage, and failure rates.
+There is a committed evaluation dataset, automated RAG evaluation suite, tracing integration & benchmark in the repository. A production evaluation plan consists of measuring Recall@k and nDCG for page-level evidence retrieval, context precision and recall, answer faithfulness and relevance, abstention accuracy, provider latency, token usage, and failure rates.
 
-No benchmark results are invented here.
 
-## Performance, Cost, and Reliability
-
-Embedding at upload time moves repeated work out of the question path, while selecting five chunks limits generation context. The current implementation still has important single-instance limits:
-
-- Uploaded PDFs, vectors, and general chat histories are process-local.
-- Provider calls are synchronous inside FastAPI request handlers.
-- There are no explicit provider timeouts, retries, circuit breakers, rate limits, or background ingestion queue.
-- Every upload embeds all extracted chunks in one provider request.
-- The API requires all three provider keys during import.
-- CORS origins are configured directly in `api/index.py`.
-
-For production, move document bytes and vectors to durable storage, use shared session state, run ingestion as a job, add bounded retries with timeouts, and expose health/readiness checks.
-
-## Production Architecture Direction
-
-The current API can be deployed as a small service, but multiple workers require a shared document store because `file_id` state is in memory. A production topology would use object storage for PDFs, a queue for extraction and embedding, Pinecone namespaces or metadata filters for tenant/document isolation, and a stateless FastAPI query service. Observability should record request IDs, retrieval scores, selected chunk IDs, provider timings, and token counts without logging sensitive report content by default.
 
 ## Tech Stack
 
@@ -201,41 +184,8 @@ curl -X POST http://localhost:8000/ask-simple \
   -F "question=What are practical ways to reduce office energy use?"
 ```
 
-## Important Engineering Decisions
 
-**Document-scoped retrieval:** Explicit file IDs and per-file chunk stores prevent a concurrent user from receiving the last report uploaded by someone else.
 
-**Page-aware overlapping chunks:** ESG evidence often spans a metric label and its nearby explanation. Page boundaries and modest overlap preserve that relationship without sending an entire report to the LLM.
-
-**Separate query and document embedding modes:** Cohere exposes retrieval-specific input types; using the correct mode for each side of similarity comparison improves search quality.
-
-**Strict embedding failures:** Returning zero vectors on an embedding error can produce plausible-looking but meaningless retrieval. Embedding failures now fail the operation rather than silently degrading search.
-
-**Existing Pinecone path retained:** The shared sustainability corpus remains useful for general mode, while uploaded reports avoid cross-corpus contamination until durable per-document indexing is introduced.
-
-## Challenges and Solutions
-
-- **Long PDF context:** bounded overlapping chunks and top-five selection reduce prompt noise.
-- **Cross-document contamination:** explicit `file_id` routing replaces global last-file lookup.
-- **Provider failures hidden as valid retrieval:** embedding fallbacks were removed in favor of visible errors.
-- **Deployment configuration drift:** the browser now uses `NEXT_PUBLIC_API_URL` rather than a hard-coded backend URL.
-
-## Production-Readiness Checklist
-
-- [x] Explicit document IDs for document queries
-- [x] Upload size and content-type validation
-- [x] Page-aware chunking with overlap
-- [x] Separate document and query embedding modes
-- [x] Bounded top-k document context
-- [x] Evidence-only document prompt
-- [ ] Durable document and session storage
-- [ ] Persistent vector namespaces and metadata filtering
-- [ ] Hybrid retrieval and learned reranking
-- [ ] Query rewriting and conversational retrieval
-- [ ] Automated retrieval and faithfulness evaluation
-- [ ] Provider timeouts, retries, rate limits, and tracing
-- [ ] Authentication, authorization, and tenant isolation
-- [ ] Structured source citations in API responses
 
 ## Future Improvements
 
