@@ -17,7 +17,10 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [uploadedFileId, setUploadedFileId] = useState<string | null>(null);
   const [chatMode, setChatMode] = useState<"simple" | "pdf">("simple");
+
+  const apiBaseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "");
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -34,12 +37,13 @@ export default function Home() {
     formData.append("file", file);
 
     try {
-      // ✅ UPDATED: New Railway Backend URL
-      const res = await fetch("https://ecobotsustainability-hmg6hmebhbe6f7bq.centralindia-01.azurewebsites.net/upload-pdf", {
+      const res = await fetch(`${apiBaseUrl}/upload-pdf`, {
         method: "POST",
         body: formData,
       });
       if (res.ok) {
+        const data = await res.json();
+        setUploadedFileId(data.file_id);
         setUploadedFileName(file.name);
         setChatMode("pdf");
         setMessages((prev) => [
@@ -70,10 +74,12 @@ export default function Home() {
     const formData = new FormData();
     formData.append("question", userMessage);
 
-    // ✅ UPDATED: New Railway Backend URLs
-    const endpoint = chatMode === "pdf" && uploadedFileName
-        ? "https://ecobotsustainability-hmg6hmebhbe6f7bq.centralindia-01.azurewebsites.net/ask-question"
-        : "https://ecobotsustainability-hmg6hmebhbe6f7bq.centralindia-01.azurewebsites.net/ask-simple";
+    const endpoint = chatMode === "pdf" && uploadedFileId
+        ? `${apiBaseUrl}/ask-question`
+        : `${apiBaseUrl}/ask-simple`;
+    if (chatMode === "pdf" && uploadedFileId) {
+      formData.append("file_id", uploadedFileId);
+    }
 
     try {
       const res = await fetch(endpoint, { method: "POST", body: formData });

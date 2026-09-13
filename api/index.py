@@ -7,7 +7,7 @@ import asyncio
 import logging
 
 # Make sure these imports match your actual file names!
-from .main import load_business_pdf, ask_business_question
+from .main import load_business_pdf, build_document_chunks, ask_business_question
 from .main import ask_simple_question
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -26,6 +26,7 @@ app.add_middleware(
 )
 
 pdf_text_store = {}
+pdf_chunk_store = {}
 last_file_id = None
 last_session_id = None
 
@@ -33,6 +34,7 @@ async def schedule_cleanup(file_id: str, delay_seconds: int = 600):
     await asyncio.sleep(delay_seconds)
     if file_id in pdf_text_store:
         del pdf_text_store[file_id]
+        pdf_chunk_store.pop(file_id, None)
         logging.info(f"[CLEANUP] Removed file_id: {file_id}")
         global last_file_id
         if last_file_id == file_id:
@@ -44,8 +46,16 @@ async def upload_pdf(file: UploadFile = File(...)):
     try:
         file_id = str(uuid.uuid4())
         file_contents = await file.read()
+        if len(file_contents) > 10 * 1024 * 1024:
+            return JSONResponse(status_code=413, content={"status": "error", "message": "PDF must be 10 MB or smaller."})
+        if file.content_type not in {"application/pdf", "application/octet-stream"}:
+            return JSONResponse(status_code=415, content={"status": "error", "message": "Only PDF files are supported."})
         pdf_text = load_business_pdf(io.BytesIO(file_contents))
+        document_chunks = build_document_chunks(io.BytesIO(file_contents))
+        if not document_chunks:
+            return JSONResponse(status_code=422, content={"status": "error", "message": "The PDF did not contain extractable text."})
         pdf_text_store[file_id] = pdf_text
+        pdf_chunk_store[file_id] = document_chunks
         last_file_id = file_id
         
         logging.info(f"[UPLOAD] PDF stored for file_id: {file_id}")
@@ -58,10 +68,9 @@ async def upload_pdf(file: UploadFile = File(...)):
         return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
 @app.post("/ask-question")
-async def ask_question_api(question: str = Form(...)):
-    global last_file_id
+async def ask_question_api(question: str = Form(...), file_id: str = Form(...)):
 
-    if not last_file_id or last_file_id not in pdf_text_store:
+    if file_id not in pdf_text_store:
         return JSONResponse(
             status_code=400, 
             content={"error": "No PDF uploaded yet or file expired."}
@@ -69,12 +78,13 @@ async def ask_question_api(question: str = Form(...)):
 
     try:
         # Get the text from the uploaded PDF
-        business_text = pdf_text_store[last_file_id]
+        business_text = pdf_text_store[file_id]
+        document_chunks = pdf_chunk_store[file_id]
         
         # Pass the text AND the question to your function
-        answer = ask_business_question(business_text, question)
+        answer = ask_business_question(business_text, question, document_chunks=document_chunks)
         
-        logging.info(f"[QUESTION] Answered business question for file_id: {last_file_id}")
+        logging.info(f"[QUESTION] Answered business question for file_id: {file_id}")
         return {"question": question, "answer": answer}
     except Exception as e:
         logging.error(f"[QUESTION ERROR] {e}")

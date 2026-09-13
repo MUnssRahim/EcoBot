@@ -1,6 +1,7 @@
 
 import os
 import re
+import math
 import pdfplumber
 import json
 import requests
@@ -49,17 +50,16 @@ class CohereEmbeddings:
                 embedding_types=["float"]
             )
 
-            embeddings = []
-            for emb in response.embeddings:
-                if hasattr(emb, "embedding"):
-                    embeddings.append(emb.embedding)
-                else:
-                    embeddings.append(emb)
+            embeddings = response.embeddings
+            if hasattr(embeddings, "float"):
+                return embeddings.float
+            if isinstance(embeddings, dict):
+                return embeddings["float"]
             return embeddings
 
         except Exception as e:
-            print(f"Cohere embed_documents API error: {e}")
-            return [[0.0] * 384 for _ in texts]
+            logging.exception("Cohere embed_documents API error")
+            raise RuntimeError("Document embedding failed") from e
 
     def embed_query(self, text: str) -> list[float]:
         """Embed a single query for retrieval"""
@@ -73,8 +73,8 @@ class CohereEmbeddings:
             emb = response.embeddings[0]
             return emb.embedding if hasattr(emb, "embedding") else emb
         except Exception as e:
-            print(f"Cohere embed_query API error: {e}")
-            return [0.0] * 384
+            logging.exception("Cohere embed_query API error")
+            raise RuntimeError("Query embedding failed") from e
 
 
 
@@ -121,13 +121,60 @@ def clean_text(text):
 
 
 def load_business_pdf(file_path):
-    full_text = ""
+    pages = []
     with pdfplumber.open(file_path) as pdf:
-        for page in pdf.pages:
+        for page_number, page in enumerate(pdf.pages, start=1):
             text = page.extract_text()
             if text:
-                full_text += text + "\n"
-    return clean_text(full_text)
+                pages.append(f"Page {page_number}\n{text}")
+    return clean_text("\n".join(pages))
+
+
+def build_document_chunks(file_path, chunk_size=1200, overlap=200):
+    """Extract page-aware overlapping chunks for document-scoped retrieval."""
+    chunks = []
+    with pdfplumber.open(file_path) as pdf:
+        for page_number, page in enumerate(pdf.pages, start=1):
+            text = page.extract_text()
+            if not text:
+                continue
+            normalized = clean_text(text)
+            start = 0
+            while start < len(normalized):
+                end = min(start + chunk_size, len(normalized))
+                if end < len(normalized):
+                    boundary = normalized.rfind(" ", start + chunk_size // 2, end)
+                    if boundary > start:
+                        end = boundary
+                chunk = normalized[start:end].strip()
+                if chunk:
+                    chunks.append({"page": page_number, "text": chunk})
+                if end >= len(normalized):
+                    break
+                start = max(end - overlap, start + 1)
+    embeddings = embedding_model.embed_documents([chunk["text"] for chunk in chunks])
+    for chunk, embedding in zip(chunks, embeddings):
+        chunk["embedding"] = embedding
+    return chunks
+
+
+def _cosine_similarity(left, right):
+    numerator = sum(a * b for a, b in zip(left, right))
+    left_norm = math.sqrt(sum(value * value for value in left))
+    right_norm = math.sqrt(sum(value * value for value in right))
+    if not left_norm or not right_norm:
+        return 0.0
+    return numerator / (left_norm * right_norm)
+
+
+def retrieve_document_chunks(question, chunks, limit=5):
+    query_embedding = embedding_model.embed_query(question)
+    ranked = sorted(
+        chunks,
+        key=lambda chunk: _cosine_similarity(query_embedding, chunk["embedding"]),
+        reverse=True,
+    )
+    return ranked[:limit]
 
 
 def store_business_text_from_pdf(file_path):
@@ -143,13 +190,23 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
 )
-def ask_business_question(business_text, question, debug=False):
+def ask_business_question(business_text, question, document_chunks=None, debug=False):
     log_prefix = f"[QUESTION] {question[:50]}..."
 
     try:
         if debug:
             print("\n🔍 Retrieving context from Pinecone...")
-        docs = retriever.similarity_search(question, k=8)
+        if document_chunks:
+            selected_chunks = retrieve_document_chunks(question, document_chunks)
+            context = "\n\n".join(
+                f"[Page {chunk['page']}] {chunk['text']}" for chunk in selected_chunks
+            )
+            docs = []
+        else:
+            docs = retriever.similarity_search(question, k=8)
+            context = "\n\n".join(
+                clean_text(getattr(doc, "page_content", "")[:3000]) for doc in docs
+            )
         log_docs = []
     except Exception as e:
         print("❌ Pinecone retrieval failed:", str(e))
@@ -160,7 +217,8 @@ def ask_business_question(business_text, question, debug=False):
         cleaned_doc = clean_text(getattr(doc, "page_content", "")[:10000])
         log_docs.append(f"Document {i+1}: {cleaned_doc}")
 
-    context = "\n\n".join([clean_text(getattr(doc, "page_content", "")[:15000]) for doc in docs])
+    if not document_chunks:
+        context = "\n\n".join([clean_text(getattr(doc, "page_content", "")[:3000]) for doc in docs])
 
     # --- STRICT ANTI-HALLUCINATION RULE ---
     anti_hallucination_rule = """
