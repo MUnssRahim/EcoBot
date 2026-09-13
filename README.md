@@ -1,117 +1,102 @@
-# EcoBot
+# EcoBot – Sustainability RAG Assistant
 
-EcoBot is a sustainability-focused AI assistant that helps users understand ESG and environmental performance by analyzing uploaded PDFs and answering sustainability-related questions using a retrieval-augmented generation (RAG) workflow.
+EcoBot is an intelligent **Retrieval-Augmented Generation (RAG)** system that analyzes business documents and answers questions related to **sustainability and ESG practices**.
 
-Live demo: https://victorious-stone-0e5e7de00.1.azurestaticapps.net/
+It allows users to upload **business PDFs (like sustainability or ESG reports)** and ask questions about them. The system retrieves relevant document sections and generates accurate answers using modern LLMs.
 
-## Why EcoBot?
+EcoBot can also answer **general sustainability questions**, even without a document.
 
-Businesses often have valuable sustainability knowledge locked inside ESG reports, annual filings, and policy documents. EcoBot brings that information into a conversational interface so users can quickly ask:
+---
 
-- What are the company’s environmental priorities?
-- Which ESG themes are covered in the report?
-- What sustainability actions are described in the document?
-- How do the findings relate to broader sustainability practices?
+# Features
 
-## Key Features
+- 📄 Upload and analyze business PDF reports  
+- 🤖 AI-powered question answering  
+- 🔍 Semantic search across documents  
+- 🌱 Sustainability and ESG insights  
+- ⚡ Fast responses using Groq LLM  
+- 🧠 Cohere embeddings for semantic understanding  
+- 📊 Vector search with Pinecone  
 
-- PDF upload and document-based analysis
-- AI-powered question answering with contextual retrieval
-- Sustainability and ESG-focused responses
-- General sustainability Q&A without a document
-- Fast frontend experience built with Next.js
-- Backend API built with FastAPI
-- Semantic retrieval using Pinecone + embeddings
-- LLM integration with Groq
+---
 
-## Tech Stack
+# Tech Stack
 
-### Frontend
+## Frontend
 - Next.js
 - React
 - TypeScript
 - Tailwind CSS
 
-### Backend
-- Python
+## Backend
 - FastAPI
-- Uvicorn
+- Python 3.11
 
-### AI and Retrieval
-- Groq LLM
-- Cohere embeddings
-- Pinecone vector database
-- PDF processing with pdfplumber
+## AI Stack
+- Groq (Mistral LLM)
+- Cohere Embeddings
+- Pinecone Vector Database
 
-## Project Structure
+---
 
-```text
-EcoBot/
-├── .github/
-│   └── workflows/
-│       └── main_ecobotsustainability.yml
-├── api/
-│   ├── __pycache__/
-│   ├── index.py
-│   └── main.py
-├── frontend/
-│   ├── app/
-│   ├── public/
-│   ├── .eslintrc.*
-│   ├── eslint.config.mjs
-│   ├── next-env.d.ts
-│   ├── next.config.ts
-│   ├── package.json
-│   ├── postcss.config.mjs
-│   ├── tsconfig.json
-│   └── Dockerfile.dev
-├── .env.example
-├── .gitignore
-├── README.md
-├── requirements.txt
-├── vercel.json
-└── .vscode/
+# Project Structure
+
+```
+EcoBot
+│
+├── frontend/        # Next.js frontend
+├── main.py          # RAG pipeline and AI logic
+├── app.py           # FastAPI backend
+├── requirements.txt # Python dependencies
+├── Dockerfile       # Container setup
+├── vercel.json      # Vercel deployment config
+└── .env.example     # Environment variable template
 ```
 
-## Local Setup
+---
 
-### 1. Clone the repository
+# Setup Instructions
+
+## 1 Clone the Repository
 
 ```bash
-git clone https://github.com/MUnssRahim/EcoBot.git
+git clone https://github.com/<your-username>/EcoBot.git
 cd EcoBot
 ```
 
-### 2. Configure environment variables
+---
 
-Copy the example file and add your real keys:
+# 2 Configure Environment Variables
 
-```bash
-cp .env.example .env
+Create a `.env` file in the root directory.
+
+```
+GROQ_API_KEY=your_key
+PINECONE_API_KEY=your_key
+COHERE_API_KEY=your_key
+
+NEXT_PUBLIC_API_URL=/api
 ```
 
-Then update the values in `.env`:
+---
 
-```env
-GROQ_API_KEY=your_groq_api_key_here
-PINECONE_API_KEY=your_pinecone_api_key_here
-COHERE_API_KEY=your_cohere_api_key_here
-NEXT_PUBLIC_API_URL=https://your-api-url-here
-```
+# 3 Run Backend
 
-### 3. Install Python dependencies
+Install Python dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Run the backend
+Run FastAPI server:
 
 ```bash
-python -m uvicorn api.index:app --reload --port 8000
+python -m uvicorn app:app --reload --port 8000
 ```
 
-### 5. Run the frontend
+---
+
+# 4 Run Frontend
 
 ```bash
 cd frontend
@@ -119,54 +104,79 @@ npm install
 npm run dev
 ```
 
-Open the app in your browser:
+---
 
-```text
+# 5 Open the Application
+
+```
 http://localhost:3000
 ```
 
-## API Overview
+---
 
-### Upload PDF
+# API Endpoints
 
-```http
-POST /upload-pdf
+## Upload PDF
+
+```
+POST /api/upload-pdf
 ```
 
-Form field:
+Form Data:
 
-```text
-file: <pdf-document>
+```
+file: <pdf document>
 ```
 
-### Ask a question about the uploaded PDF
+---
 
-```http
-POST /ask-question
+## Ask Question About Uploaded PDF
+
+```
+POST /api/ask-question
 ```
 
-### Ask a general sustainability question
+Body:
 
-```http
-POST /ask-simple
+```
+question=What sustainability practices does the company follow?
 ```
 
-## Deployment
+---
 
-This project is configured for deployment on Azure and is also prepared for frontend hosting with Vercel-compatible patterns. The live application can be accessed here:
+## Ask General Sustainability Question
 
-https://victorious-stone-0e5e7de00.1.azurestaticapps.net/
+```
+POST /api/ask-simple
+```
 
-## Development Notes
+Body:
 
-- Uploaded PDFs are processed and temporarily retained for contextual use.
-- The system supports both document-grounded and general sustainability interaction.
-- The project is designed for business sustainability analysis, ESG review, and document-based insights.
+```
+question=What is ESG?
+```
 
-## Contributing
+---
 
-Contributions are welcome. Please keep the project structure clean, follow existing patterns, and add meaningful documentation for new features.
+# Development
 
-## License
+## Start Backend
 
-This project is intended for internal or learning use unless explicitly stated otherwise by the repository owner.
+```bash
+python -m uvicorn app:app --reload
+```
+
+## Start Frontend
+
+```bash
+cd frontend
+npm run dev
+```
+
+---
+
+# Notes
+
+- Uploaded PDFs are temporarily cached for processing
+- Designed for **business sustainability analysis**
+- Supports **document-based and general AI queries**
