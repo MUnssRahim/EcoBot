@@ -1,7 +1,7 @@
 # EcoBot
 
 <p align="center">
-  <img src="Frontend%20Image.png" width="600" height="300">
+  <img src="Ecobot%20Frontend.png" width="450" height="300">
 </p>
 
 EcoBot is a document-grounded sustainability assistant for exploring ESG reports and other environmental documents. It combines PDF extraction, page-aware semantic retrieval, Cohere embeddings, Pinecone-backed sustainability context, and a Groq-hosted LLM behind a FastAPI API and Next.js interface.
