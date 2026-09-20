@@ -9,7 +9,7 @@ The practical problem is familiar: sustainability information is distributed acr
 ## Key Features
 
 - Upload a text-based PDF and receive a document identifier.
-- Extract text with `pdfplumber`, preserving page boundaries for citations in the model context.
+- Extract text with `pdfplumber`& `OCR`, preserving page boundaries for citations in the model context.
 - Split each page into bounded, overlapping chunks and embed them with Cohere `embed-english-light-v3.0`.
 - Rank uploaded-document chunks with cosine similarity against a query embedding.
 - Retrieve general sustainability context from an existing Pinecone index.
